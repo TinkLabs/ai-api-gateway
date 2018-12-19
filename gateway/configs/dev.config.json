@@ -1,0 +1,8 @@
+{
+    "DEST_HOST":"http://internal-handy-dev-int-api-lb-786165811.ap-southeast-1.elb.amazonaws.com",
+    "NAME_HOST":"https://dev.handy.travel",
+    "AUTH_HOST":"https://auth-dev.handytravel.tech",
+    "VR_HOST":"http://ecs-api-dev-1237729520.ap-southeast-1.elb.amazonaws.com",
+    "STATISTICS_HOST":"http://ecs-api-dev-1237729520.ap-southeast-1.elb.amazonaws.com",
+    "REQUEST_HOST":"handy.travel"
+}

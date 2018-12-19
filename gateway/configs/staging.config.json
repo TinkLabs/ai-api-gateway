@@ -1,0 +1,8 @@
+{
+    "DEST_HOST":"http://internal-handy-stag-int-api-lb-976619403.ap-southeast-1.elb.amazonaws.com",
+    "NAME_HOST":"https://staging.handy.travel",
+    "AUTH_HOST":"https://auth-staging.handytravel.tech",
+    "VR_HOST":"http://ecs-api-staging-1856471143.ap-southeast-1.elb.amazonaws.com",
+    "STATISTICS_HOST":"http://ecs-api-staging-1856471143.ap-southeast-1.elb.amazonaws.com",
+    "REQUEST_HOST":"handy.travel"
+}

@@ -33,7 +33,7 @@ func Parms(key string) interface{} {
 
 func formatterHost(env string, val interface{}) interface{} {
     if env == "prod" {
-        val = "hk." + val.(string)
+        val = "https://hk." + val.(string)
     }
     return val
 }

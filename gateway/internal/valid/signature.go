@@ -3,11 +3,13 @@ package valid
 import (
 	"crypto/hmac"
 	"crypto/sha256"
-	"encoding/hex"
+	//"encoding/hex"
 	"fmt"
+	
 	"net/http"
 	"sort"
 	"io/ioutil"
+	"encoding/base64"
 
 )
 
@@ -57,7 +59,7 @@ func VerifySignature(w http.ResponseWriter, r *http.Request) string {
 
 }
 
-func GenSignature(data string ) string {
+func GenSignature(data string,) string {
 
 	//secret := "mysecret"
 	//data := "data"
@@ -70,7 +72,8 @@ func GenSignature(data string ) string {
 	h.Write([]byte(data))
 
 	// Get result and encode as hexadecimal string
-	sha := hex.EncodeToString(h.Sum(nil))
+	//sha := hex.EncodeToString(h.Sum(nil))
+	sha := base64.StdEncoding.EncodeToString(h.Sum(nil))
 
 	//fmt.Println("Result: " + sha)
 	return sha

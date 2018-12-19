@@ -1,6 +1,6 @@
 {
     "DEST_HOST":"http://internal-handy-prod-int-api-lb-2136481919.ap-southeast-1.elb.amazonaws.com",
-    "NAME_HOST":"https://handy.travel",
+    "NAME_HOST":"handy.travel",
     "AUTH_HOST":"https://auth.handytravel.tech",
     "VR_HOST":"http://ecs-api-prod-859693308.ap-southeast-1.elb.amazonaws.com",
     "STATISTICS_HOST":"http://ecs-api-prod-859693308.ap-southeast-1.elb.amazonaws.com",

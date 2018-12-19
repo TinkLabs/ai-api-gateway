@@ -5,7 +5,7 @@ import (
 	"crypto/sha256"
 	//"encoding/hex"
 	"fmt"
-	
+
 	"net/http"
 	"sort"
 	"io/ioutil"
@@ -59,14 +59,14 @@ func VerifySignature(w http.ResponseWriter, r *http.Request) string {
 
 }
 
-func GenSignature(data string,) string {
+func GenSignature(data string) string {
 
-	//secret := "mysecret"
+	secret := "/r9o3VKyp1/7mJYfxTMond/4vH8i2EWzbODqcl0AhzI="
 	//data := "data"
 	fmt.Printf("SecretData: %s\n" , data)
 
 	// Create a new HMAC by defining the hash type and the key (as byte array)
-	h := hmac.New(sha256.New, []byte(data))
+	h := hmac.New(sha256.New, []byte(secret))
 
 	// Write Data to it
 	h.Write([]byte(data))

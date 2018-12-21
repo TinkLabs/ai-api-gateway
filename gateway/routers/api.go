@@ -10,8 +10,17 @@ import (
 )
 
 func Api(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-
-	switch path := strings.Split(ps[0].Value, "/"); path[1] + "/" + path[2] {
+	if ps[0].Value == "" || ps[0].Value == "/" {
+		http.Error(w, "Unexpected Request Path", 502)
+		return
+	}
+	pathArray := strings.Split(ps[0].Value, "/")
+	if len(pathArray) < 3 {
+		http.Error(w, "Unexpected Request Path", 502)
+		return
+	}
+	path := pathArray[1] + "/" + pathArray[2]
+	switch path {
 	case "healthcheck/":
 		handlers.HealthCheck(w, r)
 	case "ai/v1":

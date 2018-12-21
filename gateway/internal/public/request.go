@@ -1,11 +1,11 @@
 package public
 
 import (
+	"errors"
+	"io/ioutil"
 	"net/http"
 	"net/url"
-	"io/ioutil"
 	"strings"
-	"errors"
 )
 
 type JsonFormat map[string]interface{}
@@ -29,12 +29,12 @@ func NewRequest(path string, method string, host string, header JsonFormat, para
 	// Request Path
 	req, err := http.NewRequest(method, path, strings.NewReader(data.Encode()))
 	if err != nil {
-        return nil, respHeader, err
-    }
+		return nil, respHeader, err
+	}
 
 	// Request Host
 	if host != "" {
-		req.Host = host	
+		req.Host = host
 	}
 
 	// Request Header
@@ -44,23 +44,22 @@ func NewRequest(path string, method string, host string, header JsonFormat, para
 
 	// Request have been maken
 	client := &http.Client{}
-    resp, err := client.Do(req)
-    if err != nil {
-        return nil, respHeader, err
-    }
-    defer resp.Body.Close()
-
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, respHeader, err
+	}
+	defer resp.Body.Close()
 
 	// Response
-    for key, val := range resp.Header {
+	for key, val := range resp.Header {
 		respHeader[key] = val[0]
-    }
-    response, err := ioutil.ReadAll(resp.Body)
-    if err != nil {
-        return nil, respHeader, err
-    }
+	}
+	response, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, respHeader, err
+	}
 
-    return response, respHeader, err
+	return response, respHeader, err
 }
 
 func OriginRequest(origin string, originKey string) string {

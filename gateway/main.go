@@ -14,6 +14,6 @@ func main() {
 	router.PUT("/*path", routers.Api)
 	router.DELETE("/*path", routers.Api)
 	router.OPTIONS("/*path", routers.Cros)
-
 	log.Fatal(http.ListenAndServe(":80", router))
+
 }

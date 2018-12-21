@@ -11,7 +11,7 @@ func TimerStart() {
 }
 
 func TimerEnd() string {
-	endTime := time.Now();
-    elapsed := endTime.Sub(startTime)
-    return elapsed.String()
+	endTime := time.Now()
+	elapsed := endTime.Sub(startTime)
+	return elapsed.String()
 }

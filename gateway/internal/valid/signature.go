@@ -6,17 +6,16 @@ import (
 	//"encoding/hex"
 	"fmt"
 
+	"encoding/base64"
+	"io/ioutil"
 	"net/http"
 	"sort"
-	"io/ioutil"
-	"encoding/base64"
-
 )
 
 func VerifySignature(w http.ResponseWriter, r *http.Request) string {
 
 	//get X-User-Id from header
-	var xUserId string = ""
+	var xUserID string = ""
 
 	//get signature from header
 	var signatureFromRequest string = ""
@@ -25,32 +24,32 @@ func VerifySignature(w http.ResponseWriter, r *http.Request) string {
 			signatureFromRequest = val[0]
 		}
 		if key == "X-User-Id" && val[0] != "" {
-			xUserId = val[0]
+			xUserID = val[0]
 		}
 	}
-	fmt.Printf("xuserid: %s\n",xUserId)
-	fmt.Printf("getSignature : %s\n",signatureFromRequest)
+	fmt.Printf("xuserid: %s\n", xUserID)
+	fmt.Printf("getSignature : %s\n", signatureFromRequest)
 
-	if signatureFromRequest == "" || xUserId == ""{
+	if signatureFromRequest == "" || xUserID == "" {
 		fmt.Println("signature or X-User-Id  is null ")
 		//return ""
 	}
 
 	var params string = ""
 	if r.Method == http.MethodGet {
-		params = GenSignatureForGet(w,  r)
+		params = GenSignatureForGet(w, r)
 	} else if r.Method == http.MethodPost {
-		params = GenSignatureForPostAndPut(w,  r)
+		params = GenSignatureForPostAndPut(w, r)
 	}
 
-	fmt.Printf("params : %s\n",params)
+	fmt.Printf("params : %s\n", params)
 
 	//createSignature
-	signature := GenSignature(params + "+X-User-Id=" + xUserId)
+	signature := GenSignature(params + "+X-User-Id=" + xUserID)
 
-	fmt.Printf("signatureResult : %s",signature)
+	fmt.Printf("signatureResult : %s", signature)
 
-	if signatureFromRequest != signature{
+	if signatureFromRequest != signature {
 		fmt.Println("signature not equal")
 		return ""
 	}
@@ -63,7 +62,7 @@ func GenSignature(data string) string {
 
 	secret := "/r9o3VKyp1/7mJYfxTMond/4vH8i2EWzbODqcl0AhzI="
 	//data := "data"
-	fmt.Printf("SecretData: %s\n" , data)
+	fmt.Printf("SecretData: %s\n", data)
 
 	// Create a new HMAC by defining the hash type and the key (as byte array)
 	h := hmac.New(sha256.New, []byte(secret))
@@ -83,12 +82,12 @@ func GenSignatureForGet(w http.ResponseWriter, r *http.Request) string {
 
 	// get the value of params
 	query := r.URL.Query()
-	fmt.Printf("query: %s\n",query)
+	fmt.Printf("query: %s\n", query)
 
 	/** sort the request params
-		1: init a slice with map query
-		2: sort the slice since map can't use sort
-	 */
+	1: init a slice with map query
+	2: sort the slice since map can't use sort
+	*/
 	paramsKey := make([]string, len(query))
 	i := 0
 	for k, _ := range query {
@@ -97,7 +96,7 @@ func GenSignatureForGet(w http.ResponseWriter, r *http.Request) string {
 	}
 
 	sort.Strings(paramsKey)
-	fmt.Printf("paramsKey result : %s\n",paramsKey)
+	fmt.Printf("paramsKey result : %s\n", paramsKey)
 
 	var params string = ""
 	j := 0
@@ -106,13 +105,13 @@ func GenSignatureForGet(w http.ResponseWriter, r *http.Request) string {
 		fmt.Println("Key:", k, "Value:", query[k][0])
 
 		//key
-		params = fmt.Sprintf("%s%s",params,k)
+		params = fmt.Sprintf("%s%s", params, k)
 
 		//value
 		if j == len(query)-1 {
-			params = fmt.Sprintf("%s=%s",params,query[k][0])
-		}else{
-			params = fmt.Sprintf("%s=%s&",params,query[k][0])
+			params = fmt.Sprintf("%s=%s", params, query[k][0])
+		} else {
+			params = fmt.Sprintf("%s=%s&", params, query[k][0])
 		}
 		j++
 	}

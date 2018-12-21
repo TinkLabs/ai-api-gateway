@@ -1,15 +1,15 @@
 package valid
 
 import (
-	"gateway/internal/public"
-	"gateway/configs"
-	"net/http"
 	"fmt"
+	"gateway/configs"
+	"gateway/internal/public"
+	"net/http"
 )
 
-func SendRequest(w http.ResponseWriter, r *http.Request,reqUrl string)  {
+func SendRequest(w http.ResponseWriter, r *http.Request, reqURL string) {
 
-	reqHeader   := make(public.JsonFormat)
+	reqHeader := make(public.JsonFormat)
 	for key, val := range r.Header {
 		reqHeader[key] = val[0]
 	}
@@ -27,7 +27,7 @@ func SendRequest(w http.ResponseWriter, r *http.Request,reqUrl string)  {
 	}
 
 	// Make Request
-	response, header, err := public.NewRequest(reqUrl, r.Method, "", reqHeader, body)
+	response, header, err := public.NewRequest(reqURL, r.Method, "", reqHeader, body)
 
 	// Request Error
 	if err != nil {
@@ -49,9 +49,9 @@ func SendRequest(w http.ResponseWriter, r *http.Request,reqUrl string)  {
 	}
 
 	// For application Log
-	public.Logger(public.Message{"path": reqUrl, "body":body, "timecount": public.TimerEnd()})
+	public.Logger(public.Message{"path": reqURL, "body": body, "timecount": public.TimerEnd()})
 
-	fmt.Printf("\n response %s",response)
+	fmt.Printf("\n response %s", response)
 	// Print the Result
 	fmt.Fprintf(w, "%s", response)
 	return

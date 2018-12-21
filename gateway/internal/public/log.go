@@ -8,7 +8,7 @@ import (
 type Message map[string]interface{}
 
 func Logger(consolelog interface{}) []byte {
-    output, _ := json.Marshal(consolelog)
+	output, _ := json.Marshal(consolelog)
 	fmt.Println(string(output))
 	return output
 }

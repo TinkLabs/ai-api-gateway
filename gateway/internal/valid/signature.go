@@ -37,8 +37,8 @@ func VerifySignature(w http.ResponseWriter, r *http.Request) string {
 	var params string = ""
 	if r.Method == http.MethodGet {
 		params = GenSignatureForGet(w,  r)
-	} else if r.Method == http.MethodPost {
-		params = GenSignatureForPostAndPut(w,  r)
+	} else if r.Method == http.MethodPost || r.Method == http.MethodPatch {
+		params = GenSignatureForPostAndPutAndPatch(w,  r)
 	}
 
 	fmt.Printf("params : %s\n",params)
@@ -118,7 +118,7 @@ func GenSignatureForGet(w http.ResponseWriter, r *http.Request) string {
 
 }
 
-func GenSignatureForPostAndPut(w http.ResponseWriter, r *http.Request) string {
+func GenSignatureForPostAndPutAndPatch(w http.ResponseWriter, r *http.Request) string {
 
 	// get the value of body
 	body, _ := ioutil.ReadAll(r.Body)

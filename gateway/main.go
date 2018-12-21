@@ -12,6 +12,7 @@ func main() {
 	router.GET("/*path", routers.Api)
 	router.POST("/*path", routers.Api)
 	router.PUT("/*path", routers.Api)
+	router.PATCH("/*path", routers.Api)
 	router.DELETE("/*path", routers.Api)
 	router.OPTIONS("/*path", routers.Cros)
 

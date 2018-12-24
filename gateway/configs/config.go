@@ -14,7 +14,7 @@ func Parms(key string) interface{} {
 
 	env := os.Getenv("ENV")
 	if cache[key] == nil {
-		jsonStr, err := os.Open("/var/src/gateway/configs/" + env + ".config.json")
+		jsonStr, err := os.Open("configs/" + env + ".config.json")
 		if err != nil {
 			log.Fatal("File error: %v\n", err)
 		}

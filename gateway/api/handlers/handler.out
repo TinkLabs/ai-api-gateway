@@ -1,4 +1,10 @@
 mode: set
+gateway/api/handlers/healthHandler.go:9.58,15.2 3 1
+gateway/api/handlers/microHandler.go:12.80,19.26 4 1
+gateway/api/handlers/microHandler.go:25.2,26.17 2 1
+gateway/api/handlers/microHandler.go:32.2,38.33 4 1
+gateway/api/handlers/microHandler.go:19.26,22.3 2 1
+gateway/api/handlers/microHandler.go:26.17,30.3 3 1
 gateway/api/handlers/aiHandler.go:11.57,18.26 4 1
 gateway/api/handlers/aiHandler.go:23.2,30.33 4 1
 gateway/api/handlers/aiHandler.go:18.26,21.3 2 1
@@ -20,9 +26,3 @@ gateway/api/handlers/backendHandler.go:46.37,48.5 1 0
 gateway/api/handlers/backendHandler.go:56.16,60.3 3 0
 gateway/api/handlers/backendHandler.go:63.31,65.3 1 0
 gateway/api/handlers/backendHandler.go:67.22,71.3 3 0
-gateway/api/handlers/healthHandler.go:9.58,15.2 3 0
-gateway/api/handlers/microHandler.go:12.80,19.26 4 1
-gateway/api/handlers/microHandler.go:25.2,26.17 2 1
-gateway/api/handlers/microHandler.go:32.2,38.33 4 1
-gateway/api/handlers/microHandler.go:19.26,22.3 2 1
-gateway/api/handlers/microHandler.go:26.17,30.3 3 1

@@ -58,7 +58,7 @@
 				
 				<option value="file1">gateway/api/handlers/backendHandler.go (0.0%)</option>
 				
-				<option value="file2">gateway/api/handlers/healthHandler.go (0.0%)</option>
+				<option value="file2">gateway/api/handlers/healthHandler.go (100.0%)</option>
 				
 				<option value="file3">gateway/api/handlers/microHandler.go (100.0%)</option>
 				
@@ -197,10 +197,10 @@ import (
         "time"
 )
 
-func HealthCheck(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+func HealthCheck(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
 
         w.Header().Set("Content-Type", "application/json")
-        w.Write(public.Logger(public.Message{"path": r.URL.String(), "status": true, "datetime": time.Now()}))
+        w.Write(public.Logger(public.Message{"path": r.URL.String(), "status": true, "datetime": time.Now(), "handlers": "healthHandler"}))
 
         return
 }</span>

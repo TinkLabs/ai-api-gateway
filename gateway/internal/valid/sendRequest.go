@@ -2,7 +2,7 @@ package valid
 
 import (
 	"fmt"
-	"gateway/configs"
+	//"gateway/configs"
 	"gateway/internal/public"
 	"net/http"
 )
@@ -41,12 +41,12 @@ func SendRequest(w http.ResponseWriter, r *http.Request, reqURL string) {
 		w.Header().Add(key, val.(string))
 	}
 
-	originName := public.OriginRequest(string(r.Header.Get("Origin")), configs.Parms("REQUEST_HOST").(string))
-	if originName != "" {
-		w.Header().Set("Access-Control-Allow-Origin", originName)
-		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-		w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
-	}
+	//originName := public.OriginRequest(string(r.Header.Get("Origin")), configs.Parms("REQUEST_HOST").(string))
+	//if originName != "" {
+	//	w.Header().Set("Access-Control-Allow-Origin", originName)
+	//	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	//	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+	//}
 
 	// For application Log
 	public.Logger(public.Message{"path": reqURL, "body": body, "timecount": public.TimerEnd()})

@@ -26,8 +26,7 @@ func TestAiServices(t *testing.T) {
 
 func MyfuncAiServices(signature string,t *testing.T){
 
-	// Create a request to pass to our handler. We don't have any query parameters for now, so we'll
-	// pass 'nil' as the third parameter.
+	// Create a request to pass to our handler.
 
 	reqURL := "/ai/v1/user/hotel_id_verification?hotel_id=123"
 

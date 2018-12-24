@@ -1,0 +1,1747 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">gateway/api/handlers/aiHandler.go (100.0%)</option>
+				
+				<option value="file1">gateway/api/handlers/backendHandler.go (0.0%)</option>
+				
+				<option value="file2">gateway/api/handlers/healthHandler.go (100.0%)</option>
+				
+				<option value="file3">gateway/api/handlers/microHandler.go (100.0%)</option>
+				
+				<option value="file4">gateway/internal/valid/authenticate.go (0.0%)</option>
+				
+				<option value="file5">gateway/internal/valid/sendRequest.go (72.7%)</option>
+				
+				<option value="file6">gateway/internal/valid/signature.go (86.5%)</option>
+				
+				<option value="file7">gateway/pkg/dep/sources/https---github.com-julienschmidt-httprouter/params_go17.go (71.4%)</option>
+				
+				<option value="file8">gateway/pkg/dep/sources/https---github.com-julienschmidt-httprouter/path.go (100.0%)</option>
+				
+				<option value="file9">gateway/pkg/dep/sources/https---github.com-julienschmidt-httprouter/router.go (100.0%)</option>
+				
+				<option value="file10">gateway/pkg/dep/sources/https---github.com-julienschmidt-httprouter/tree.go (100.0%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package handlers
+
+import (
+        "fmt"
+        "gateway/configs"
+        "gateway/internal/public"
+        "gateway/internal/valid"
+        "net/http"
+)
+
+func AiServices(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        fmt.Println("Ai Service")
+
+        public.TimerStart()
+
+        //VerifySignature
+        signatureCheck := valid.VerifySignature(w, r)
+        if signatureCheck == "" </span><span class="cov8" title="1">{
+                http.Error(w, "access denied,unexpected signature or X-User-Id should not be null", 400)
+                return
+        }</span>
+
+        <span class="cov8" title="1">fmt.Println("begin to sent request")
+        // Setup Request
+        reqURL:= configs.Parms("NAME_HOST").(string) + r.URL.String()
+
+        fmt.Printf("reqUrl %s\n", reqURL)
+
+        //send request and return response
+        valid.SendRequest(w, r, reqURL)</span>
+
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package handlers
+
+import (
+        "fmt"
+        "gateway/configs"
+        "gateway/internal/public"
+        "gateway/internal/valid"
+        "net/http"
+)
+
+func Backend2(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        // For re-route testing ["https://gateway-dev.handytravel.tech/apis/getlauncher?_barcode=357525081159035"]
+        public.TimerStart()
+
+        // Setup Request
+        reqAuth := ""
+        reqUrl := configs.Parms("DEST_HOST").(string) + r.URL.String()
+        reqHost := configs.Parms("NAME_HOST").(string)
+        reqHeader := make(public.JsonFormat)
+        for key, val := range r.Header </span><span class="cov0" title="0">{
+                if key == "Authorization" &amp;&amp; val[0] != "" </span><span class="cov0" title="0">{
+                        reqAuth = val[0]
+                }</span>
+                <span class="cov0" title="0">reqHeader[key] = val[0]</span>
+        }
+        <span class="cov0" title="0">reqHeader["Cache-Control"] = "no-cache"
+        reqHeader["X-Forwarded-For"] = r.RemoteAddr
+        reqHeader["X-Forwarded-Proto"] = "https"
+        reqHeader["X-Internal"] = "wrapper"
+
+        // Setup Body
+        r.ParseForm()
+        body := make(public.JsonFormat)
+        for key, val := range r.Form </span><span class="cov0" title="0">{
+                body[key] = val[0]
+        }</span>
+
+        // Valid Request
+        <span class="cov0" title="0">if reqAuth != "" </span><span class="cov0" title="0">{
+                reqAccount, err := valid.AuthDeviceUser(reqAuth)
+                if err != nil </span><span class="cov0" title="0">{
+                        fmt.Println(err.Error())
+                        http.Error(w, err.Error(), 500)
+                        return
+                }</span> else<span class="cov0" title="0"> {
+                        for key, val := range reqAccount </span><span class="cov0" title="0">{
+                                body[key] = val
+                        }</span>
+                }
+        }
+
+        // Make Request
+        <span class="cov0" title="0">response, header, err := public.NewRequest(reqUrl, r.Method, reqHost, reqHeader, body)
+
+        // Request Error
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Println(err.Error())
+                http.Error(w, err.Error(), 500)
+                return
+        }</span>
+
+        // Response Header setup
+        <span class="cov0" title="0">for key, val := range header </span><span class="cov0" title="0">{
+                w.Header().Add(key, val.(string))
+        }</span>
+        <span class="cov0" title="0">originName := public.OriginRequest(string(r.Header.Get("Origin")), configs.Parms("REQUEST_HOST").(string))
+        if originName != "" </span><span class="cov0" title="0">{
+                w.Header().Set("Access-Control-Allow-Origin", originName)
+                w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+                w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+        }</span>
+
+        // For application Log
+        <span class="cov0" title="0">public.Logger(public.Message{"prefix": "backend2", "path": r.URL.String(), "body": body, "timecount": public.TimerEnd()})
+
+        // Print the Result
+        fmt.Fprintf(w, "%s", response)
+        return</span>
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package handlers
+
+import (
+        "gateway/internal/public"
+        "net/http"
+        "time"
+)
+
+func HealthCheck(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+
+        w.Header().Set("Content-Type", "application/json")
+        w.Write(public.Logger(public.Message{"path": r.URL.String(), "status": true, "datetime": time.Now(), "handlers": "healthHandler"}))
+
+        return
+}</span>
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package handlers
+
+import (
+        "fmt"
+        "gateway/configs"
+        "gateway/internal/public"
+        "gateway/internal/valid"
+        "net/http"
+        "strings"
+)
+
+func StatisticsServices(w http.ResponseWriter, r *http.Request, prefix string) <span class="cov8" title="1">{
+        fmt.Println("Statistics Service")
+
+        public.TimerStart()
+
+        //VerifySignature
+        signatureCheck := valid.VerifySignature(w, r)
+        if signatureCheck == "" </span><span class="cov8" title="1">{
+                http.Error(w, "access denied,unexpected signature or X-User-Id should not be null", 400)
+                return
+        }</span>
+
+        // Setup Request
+        <span class="cov8" title="1">path := configs.Parms(prefix + "_HOST")
+        if path == nil </span><span class="cov8" title="1">{
+                fmt.Println(prefix + ": undefined config")
+                http.Error(w, "undefined config", 500)
+                return
+        }</span>
+
+        <span class="cov8" title="1">pathEnd := strings.Replace(r.URL.String(), "ai/portal-stats/", "", 15)
+
+        reqURL := path.(string) + pathEnd
+        fmt.Printf("reqURL %s\n", reqURL)
+
+        //send request and return response
+        valid.SendRequest(w, r, reqURL)</span>
+
+}
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package valid
+
+import (
+        "encoding/json"
+        "gateway/configs"
+        "gateway/internal/public"
+)
+
+func AuthDeviceUser(authToken string) (public.JsonFormat, error) <span class="cov0" title="0">{
+
+        public.TimerStart()
+        reqUrl := configs.Parms("AUTH_HOST").(string) + "/oauth/verify"
+        reqHeader := make(public.JsonFormat)
+        reqHeader["Authorization"] = authToken
+        response, _, err := public.NewRequest(reqUrl, "POST", "", reqHeader, nil)
+
+        // Change the response to Map
+        jsonMap := make(public.JsonFormat)
+        err = json.Unmarshal([]byte(response), &amp;jsonMap)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        // For application Log
+        <span class="cov0" title="0">public.Logger(public.Message{"path": "/authenticate", "authToken": authToken, "timecount": public.TimerEnd()})
+
+        // Return Formater
+        jsonMap["code"] = int(jsonMap["code"].(float64))
+        if jsonMap["code"] == 400 </span><span class="cov0" title="0">{
+                jsonMap = nil
+        }</span>
+        <span class="cov0" title="0">return jsonMap, err</span>
+}
+</pre>
+		
+		<pre class="file" id="file5" style="display: none">package valid
+
+import (
+        "fmt"
+        //"gateway/configs"
+        "gateway/internal/public"
+        "net/http"
+)
+
+func SendRequest(w http.ResponseWriter, r *http.Request, reqURL string) <span class="cov8" title="1">{
+
+        reqHeader := make(public.JsonFormat)
+        for key, val := range r.Header </span><span class="cov8" title="1">{
+                reqHeader[key] = val[0]
+        }</span>
+        <span class="cov8" title="1">reqHeader["Cache-Control"] = "no-cache"
+        reqHeader["X-Forwarded-For"] = r.RemoteAddr
+        reqHeader["X-Forwarded-Proto"] = "https"
+        //reqHeader["X-by-pass-jwt"] = "true"
+        reqHeader["Authorization"] = "73bef7wr4kw84vfu8hbrudvmfudy"
+
+        // Setup Body
+        r.ParseForm()
+        body := make(public.JsonFormat)
+        for key, val := range r.Form </span><span class="cov8" title="1">{
+                body[key] = val[0]
+        }</span>
+
+        // Make Request
+        <span class="cov8" title="1">response, header, err := public.NewRequest(reqURL, r.Method, "", reqHeader, body)
+
+        // Request Error
+        if err != nil </span><span class="cov8" title="1">{
+                fmt.Println(err.Error())
+                http.Error(w, err.Error(), 500)
+                return
+        }</span>
+
+        // Response Header setup
+        <span class="cov0" title="0">for key, val := range header </span><span class="cov0" title="0">{
+                w.Header().Add(key, val.(string))
+        }</span>
+
+        //originName := public.OriginRequest(string(r.Header.Get("Origin")), configs.Parms("REQUEST_HOST").(string))
+        //if originName != "" {
+        //        w.Header().Set("Access-Control-Allow-Origin", originName)
+        //        w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+        //        w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+        //}
+
+        // For application Log
+        <span class="cov0" title="0">public.Logger(public.Message{"path": reqURL, "body": body, "timecount": public.TimerEnd()})
+
+        fmt.Printf("\n response %s", response)
+        // Print the Result
+        fmt.Fprintf(w, "%s", response)
+        return</span>
+}
+</pre>
+		
+		<pre class="file" id="file6" style="display: none">package valid
+
+import (
+        "crypto/hmac"
+        "crypto/sha256"
+        //"encoding/hex"
+        "fmt"
+
+        "encoding/base64"
+        "io/ioutil"
+        "net/http"
+        "sort"
+)
+
+func VerifySignature(w http.ResponseWriter, r *http.Request) string <span class="cov8" title="1">{
+
+        //get X-User-Id from header
+        var xUserID string = ""
+
+        //get signature from header
+        var signatureFromRequest string = ""
+        for key, val := range r.Header </span><span class="cov8" title="1">{
+                if key == "X-Signature" &amp;&amp; val[0] != "" </span><span class="cov8" title="1">{
+                        signatureFromRequest = val[0]
+                }</span>
+                <span class="cov8" title="1">if key == "X-User-Id" &amp;&amp; val[0] != "" </span><span class="cov8" title="1">{
+                        xUserID = val[0]
+                }</span>
+        }
+        <span class="cov8" title="1">fmt.Printf("xuserid: %s\n", xUserID)
+        fmt.Printf("getSignature : %s\n", signatureFromRequest)
+
+        if signatureFromRequest == "" || xUserID == "" </span><span class="cov8" title="1">{
+                fmt.Println("signature or X-User-Id  is null ")
+                //return ""
+        }</span>
+
+        <span class="cov8" title="1">var params string = ""
+        if r.Method == http.MethodGet </span><span class="cov8" title="1">{
+                params = GenSignatureForGet(w, r)
+        }</span> else<span class="cov0" title="0"> if r.Method == http.MethodPost </span><span class="cov0" title="0">{
+                params = GenSignatureForPostAndPut(w, r)
+        }</span>
+
+        <span class="cov8" title="1">fmt.Printf("params : %s\n", params)
+
+        //createSignature
+        signature := GenSignature(params + "+X-User-Id=" + xUserID)
+
+        fmt.Printf("signatureResult : %s", signature)
+
+        if signatureFromRequest != signature </span><span class="cov8" title="1">{
+                fmt.Println("signature not equal")
+                return ""
+        }</span>
+
+        <span class="cov8" title="1">return signature</span>
+
+}
+
+func GenSignature(data string) string <span class="cov8" title="1">{
+
+        secret := "/r9o3VKyp1/7mJYfxTMond/4vH8i2EWzbODqcl0AhzI="
+        //data := "data"
+        fmt.Printf("SecretData: %s\n", data)
+
+        // Create a new HMAC by defining the hash type and the key (as byte array)
+        h := hmac.New(sha256.New, []byte(secret))
+
+        // Write Data to it
+        h.Write([]byte(data))
+
+        // Get result and encode as hexadecimal string
+        //sha := hex.EncodeToString(h.Sum(nil))
+        sha := base64.StdEncoding.EncodeToString(h.Sum(nil))
+
+        //fmt.Println("Result: " + sha)
+        return sha
+}</span>
+
+func GenSignatureForGet(w http.ResponseWriter, r *http.Request) string <span class="cov8" title="1">{
+
+        // get the value of params
+        query := r.URL.Query()
+        fmt.Printf("query: %s\n", query)
+
+        /** sort the request params
+        1: init a slice with map query
+        2: sort the slice since map can't use sort
+        */
+        paramsKey := make([]string, len(query))
+        i := 0
+        for k, _ := range query </span><span class="cov8" title="1">{
+                paramsKey[i] = k
+                i++
+        }</span>
+
+        <span class="cov8" title="1">sort.Strings(paramsKey)
+        fmt.Printf("paramsKey result : %s\n", paramsKey)
+
+        var params string = ""
+        j := 0
+
+        for _, k := range paramsKey </span><span class="cov8" title="1">{
+                fmt.Println("Key:", k, "Value:", query[k][0])
+
+                //key
+                params = fmt.Sprintf("%s%s", params, k)
+
+                //value
+                if j == len(query)-1 </span><span class="cov8" title="1">{
+                        params = fmt.Sprintf("%s=%s", params, query[k][0])
+                }</span> else<span class="cov0" title="0"> {
+                        params = fmt.Sprintf("%s=%s&amp;", params, query[k][0])
+                }</span>
+                <span class="cov8" title="1">j++</span>
+        }
+
+        <span class="cov8" title="1">return params</span>
+
+}
+
+func GenSignatureForPostAndPut(w http.ResponseWriter, r *http.Request) string <span class="cov0" title="0">{
+
+        // get the value of body
+        body, _ := ioutil.ReadAll(r.Body)
+        var params string = ""
+
+        params = fmt.Sprintf("%s", body)
+
+        return params
+}</span>
+</pre>
+		
+		<pre class="file" id="file7" style="display: none">// +build go1.7
+
+package httprouter
+
+import (
+        "context"
+        "net/http"
+)
+
+type paramsKey struct{}
+
+// ParamsKey is the request context key under which URL params are stored.
+//
+// This is only present from go 1.7.
+var ParamsKey = paramsKey{}
+
+// Handler is an adapter which allows the usage of an http.Handler as a
+// request handle. With go 1.7+, the Params will be available in the
+// request context under ParamsKey.
+func (r *Router) Handler(method, path string, handler http.Handler) <span class="cov8" title="1">{
+        r.Handle(method, path,
+                func(w http.ResponseWriter, req *http.Request, p Params) </span><span class="cov8" title="1">{
+                        ctx := req.Context()
+                        ctx = context.WithValue(ctx, ParamsKey, p)
+                        req = req.WithContext(ctx)
+                        handler.ServeHTTP(w, req)
+                }</span>,
+        )
+}
+
+// ParamsFromContext pulls the URL parameters from a request context,
+// or returns nil if none are present.
+//
+// This is only present from go 1.7.
+func ParamsFromContext(ctx context.Context) Params <span class="cov0" title="0">{
+        p, _ := ctx.Value(ParamsKey).(Params)
+        return p
+}</span>
+</pre>
+		
+		<pre class="file" id="file8" style="display: none">// Copyright 2013 Julien Schmidt. All rights reserved.
+// Based on the path package, Copyright 2009 The Go Authors.
+// Use of this source code is governed by a BSD-style license that can be found
+// in the LICENSE file.
+
+package httprouter
+
+// CleanPath is the URL version of path.Clean, it returns a canonical URL path
+// for p, eliminating . and .. elements.
+//
+// The following rules are applied iteratively until no further processing can
+// be done:
+//        1. Replace multiple slashes with a single slash.
+//        2. Eliminate each . path name element (the current directory).
+//        3. Eliminate each inner .. path name element (the parent directory)
+//           along with the non-.. element that precedes it.
+//        4. Eliminate .. elements that begin a rooted path:
+//           that is, replace "/.." by "/" at the beginning of a path.
+//
+// If the result of this process is an empty string, "/" is returned
+func CleanPath(p string) string <span class="cov8" title="1">{
+        // Turn empty string into "/"
+        if p == "" </span><span class="cov8" title="1">{
+                return "/"
+        }</span>
+
+        <span class="cov8" title="1">n := len(p)
+        var buf []byte
+
+        // Invariants:
+        //      reading from path; r is index of next byte to process.
+        //      writing to buf; w is index of next byte to write.
+
+        // path must start with '/'
+        r := 1
+        w := 1
+
+        if p[0] != '/' </span><span class="cov8" title="1">{
+                r = 0
+                buf = make([]byte, n+1)
+                buf[0] = '/'
+        }</span>
+
+        <span class="cov8" title="1">trailing := n &gt; 1 &amp;&amp; p[n-1] == '/'
+
+        // A bit more clunky without a 'lazybuf' like the path package, but the loop
+        // gets completely inlined (bufApp). So in contrast to the path package this
+        // loop has no expensive function calls (except 1x make)
+
+        for r &lt; n </span><span class="cov8" title="1">{
+                switch </span>{
+                case p[r] == '/':<span class="cov8" title="1">
+                        // empty path element, trailing slash is added after the end
+                        r++</span>
+
+                case p[r] == '.' &amp;&amp; r+1 == n:<span class="cov8" title="1">
+                        trailing = true
+                        r++</span>
+
+                case p[r] == '.' &amp;&amp; p[r+1] == '/':<span class="cov8" title="1">
+                        // . element
+                        r += 2</span>
+
+                case p[r] == '.' &amp;&amp; p[r+1] == '.' &amp;&amp; (r+2 == n || p[r+2] == '/'):<span class="cov8" title="1">
+                        // .. element: remove to last /
+                        r += 3
+
+                        if w &gt; 1 </span><span class="cov8" title="1">{
+                                // can backtrack
+                                w--
+
+                                if buf == nil </span><span class="cov8" title="1">{
+                                        for w &gt; 1 &amp;&amp; p[w] != '/' </span><span class="cov8" title="1">{
+                                                w--
+                                        }</span>
+                                } else<span class="cov8" title="1"> {
+                                        for w &gt; 1 &amp;&amp; buf[w] != '/' </span><span class="cov8" title="1">{
+                                                w--
+                                        }</span>
+                                }
+                        }
+
+                default:<span class="cov8" title="1">
+                        // real path element.
+                        // add slash if needed
+                        if w &gt; 1 </span><span class="cov8" title="1">{
+                                bufApp(&amp;buf, p, w, '/')
+                                w++
+                        }</span>
+
+                        // copy element
+                        <span class="cov8" title="1">for r &lt; n &amp;&amp; p[r] != '/' </span><span class="cov8" title="1">{
+                                bufApp(&amp;buf, p, w, p[r])
+                                w++
+                                r++
+                        }</span>
+                }
+        }
+
+        // re-append trailing slash
+        <span class="cov8" title="1">if trailing &amp;&amp; w &gt; 1 </span><span class="cov8" title="1">{
+                bufApp(&amp;buf, p, w, '/')
+                w++
+        }</span>
+
+        <span class="cov8" title="1">if buf == nil </span><span class="cov8" title="1">{
+                return p[:w]
+        }</span>
+        <span class="cov8" title="1">return string(buf[:w])</span>
+}
+
+// internal helper to lazily create a buffer if necessary
+func bufApp(buf *[]byte, s string, w int, c byte) <span class="cov8" title="1">{
+        if *buf == nil </span><span class="cov8" title="1">{
+                if s[w] == c </span><span class="cov8" title="1">{
+                        return
+                }</span>
+
+                <span class="cov8" title="1">*buf = make([]byte, len(s))
+                copy(*buf, s[:w])</span>
+        }
+        <span class="cov8" title="1">(*buf)[w] = c</span>
+}
+</pre>
+		
+		<pre class="file" id="file9" style="display: none">// Copyright 2013 Julien Schmidt. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be found
+// in the LICENSE file.
+
+// Package httprouter is a trie based high performance HTTP request router.
+//
+// A trivial example is:
+//
+//  package main
+//
+//  import (
+//      "fmt"
+//      "github.com/julienschmidt/httprouter"
+//      "net/http"
+//      "log"
+//  )
+//
+//  func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+//      fmt.Fprint(w, "Welcome!\n")
+//  }
+//
+//  func Hello(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+//      fmt.Fprintf(w, "hello, %s!\n", ps.ByName("name"))
+//  }
+//
+//  func main() {
+//      router := httprouter.New()
+//      router.GET("/", Index)
+//      router.GET("/hello/:name", Hello)
+//
+//      log.Fatal(http.ListenAndServe(":8080", router))
+//  }
+//
+// The router matches incoming requests by the request method and the path.
+// If a handle is registered for this path and method, the router delegates the
+// request to that function.
+// For the methods GET, POST, PUT, PATCH and DELETE shortcut functions exist to
+// register handles, for all other methods router.Handle can be used.
+//
+// The registered path, against which the router matches incoming requests, can
+// contain two types of parameters:
+//  Syntax    Type
+//  :name     named parameter
+//  *name     catch-all parameter
+//
+// Named parameters are dynamic path segments. They match anything until the
+// next '/' or the path end:
+//  Path: /blog/:category/:post
+//
+//  Requests:
+//   /blog/go/request-routers            match: category="go", post="request-routers"
+//   /blog/go/request-routers/           no match, but the router would redirect
+//   /blog/go/                           no match
+//   /blog/go/request-routers/comments   no match
+//
+// Catch-all parameters match anything until the path end, including the
+// directory index (the '/' before the catch-all). Since they match anything
+// until the end, catch-all parameters must always be the final path element.
+//  Path: /files/*filepath
+//
+//  Requests:
+//   /files/                             match: filepath="/"
+//   /files/LICENSE                      match: filepath="/LICENSE"
+//   /files/templates/article.html       match: filepath="/templates/article.html"
+//   /files                              no match, but the router would redirect
+//
+// The value of parameters is saved as a slice of the Param struct, consisting
+// each of a key and a value. The slice is passed to the Handle func as a third
+// parameter.
+// There are two ways to retrieve the value of a parameter:
+//  // by the name of the parameter
+//  user := ps.ByName("user") // defined by :user or *user
+//
+//  // by the index of the parameter. This way you can also get the name (key)
+//  thirdKey   := ps[2].Key   // the name of the 3rd parameter
+//  thirdValue := ps[2].Value // the value of the 3rd parameter
+package httprouter
+
+import (
+        "net/http"
+)
+
+// Handle is a function that can be registered to a route to handle HTTP
+// requests. Like http.HandlerFunc, but has a third parameter for the values of
+// wildcards (variables).
+type Handle func(http.ResponseWriter, *http.Request, Params)
+
+// Param is a single URL parameter, consisting of a key and a value.
+type Param struct {
+        Key   string
+        Value string
+}
+
+// Params is a Param-slice, as returned by the router.
+// The slice is ordered, the first URL parameter is also the first slice value.
+// It is therefore safe to read values by the index.
+type Params []Param
+
+// ByName returns the value of the first Param which key matches the given name.
+// If no matching Param is found, an empty string is returned.
+func (ps Params) ByName(name string) string <span class="cov8" title="1">{
+        for i := range ps </span><span class="cov8" title="1">{
+                if ps[i].Key == name </span><span class="cov8" title="1">{
+                        return ps[i].Value
+                }</span>
+        }
+        <span class="cov8" title="1">return ""</span>
+}
+
+// Router is a http.Handler which can be used to dispatch requests to different
+// handler functions via configurable routes
+type Router struct {
+        trees map[string]*node
+
+        // Enables automatic redirection if the current route can't be matched but a
+        // handler for the path with (without) the trailing slash exists.
+        // For example if /foo/ is requested but a route only exists for /foo, the
+        // client is redirected to /foo with http status code 301 for GET requests
+        // and 307 for all other request methods.
+        RedirectTrailingSlash bool
+
+        // If enabled, the router tries to fix the current request path, if no
+        // handle is registered for it.
+        // First superfluous path elements like ../ or // are removed.
+        // Afterwards the router does a case-insensitive lookup of the cleaned path.
+        // If a handle can be found for this route, the router makes a redirection
+        // to the corrected path with status code 301 for GET requests and 307 for
+        // all other request methods.
+        // For example /FOO and /..//Foo could be redirected to /foo.
+        // RedirectTrailingSlash is independent of this option.
+        RedirectFixedPath bool
+
+        // If enabled, the router checks if another method is allowed for the
+        // current route, if the current request can not be routed.
+        // If this is the case, the request is answered with 'Method Not Allowed'
+        // and HTTP status code 405.
+        // If no other Method is allowed, the request is delegated to the NotFound
+        // handler.
+        HandleMethodNotAllowed bool
+
+        // If enabled, the router automatically replies to OPTIONS requests.
+        // Custom OPTIONS handlers take priority over automatic replies.
+        HandleOPTIONS bool
+
+        // Configurable http.Handler which is called when no matching route is
+        // found. If it is not set, http.NotFound is used.
+        NotFound http.Handler
+
+        // Configurable http.Handler which is called when a request
+        // cannot be routed and HandleMethodNotAllowed is true.
+        // If it is not set, http.Error with http.StatusMethodNotAllowed is used.
+        // The "Allow" header with allowed request methods is set before the handler
+        // is called.
+        MethodNotAllowed http.Handler
+
+        // Function to handle panics recovered from http handlers.
+        // It should be used to generate a error page and return the http error code
+        // 500 (Internal Server Error).
+        // The handler can be used to keep your server from crashing because of
+        // unrecovered panics.
+        PanicHandler func(http.ResponseWriter, *http.Request, interface{})
+}
+
+// Make sure the Router conforms with the http.Handler interface
+var _ http.Handler = New()
+
+// New returns a new initialized Router.
+// Path auto-correction, including trailing slashes, is enabled by default.
+func New() *Router <span class="cov8" title="1">{
+        return &amp;Router{
+                RedirectTrailingSlash:  true,
+                RedirectFixedPath:      true,
+                HandleMethodNotAllowed: true,
+                HandleOPTIONS:          true,
+        }
+}</span>
+
+// GET is a shortcut for router.Handle("GET", path, handle)
+func (r *Router) GET(path string, handle Handle) <span class="cov8" title="1">{
+        r.Handle("GET", path, handle)
+}</span>
+
+// HEAD is a shortcut for router.Handle("HEAD", path, handle)
+func (r *Router) HEAD(path string, handle Handle) <span class="cov8" title="1">{
+        r.Handle("HEAD", path, handle)
+}</span>
+
+// OPTIONS is a shortcut for router.Handle("OPTIONS", path, handle)
+func (r *Router) OPTIONS(path string, handle Handle) <span class="cov8" title="1">{
+        r.Handle("OPTIONS", path, handle)
+}</span>
+
+// POST is a shortcut for router.Handle("POST", path, handle)
+func (r *Router) POST(path string, handle Handle) <span class="cov8" title="1">{
+        r.Handle("POST", path, handle)
+}</span>
+
+// PUT is a shortcut for router.Handle("PUT", path, handle)
+func (r *Router) PUT(path string, handle Handle) <span class="cov8" title="1">{
+        r.Handle("PUT", path, handle)
+}</span>
+
+// PATCH is a shortcut for router.Handle("PATCH", path, handle)
+func (r *Router) PATCH(path string, handle Handle) <span class="cov8" title="1">{
+        r.Handle("PATCH", path, handle)
+}</span>
+
+// DELETE is a shortcut for router.Handle("DELETE", path, handle)
+func (r *Router) DELETE(path string, handle Handle) <span class="cov8" title="1">{
+        r.Handle("DELETE", path, handle)
+}</span>
+
+// Handle registers a new request handle with the given path and method.
+//
+// For GET, POST, PUT, PATCH and DELETE requests the respective shortcut
+// functions can be used.
+//
+// This function is intended for bulk loading and to allow the usage of less
+// frequently used, non-standardized or custom methods (e.g. for internal
+// communication with a proxy).
+func (r *Router) Handle(method, path string, handle Handle) <span class="cov8" title="1">{
+        if path[0] != '/' </span><span class="cov8" title="1">{
+                panic("path must begin with '/' in path '" + path + "'")</span>
+        }
+
+        <span class="cov8" title="1">if r.trees == nil </span><span class="cov8" title="1">{
+                r.trees = make(map[string]*node)
+        }</span>
+
+        <span class="cov8" title="1">root := r.trees[method]
+        if root == nil </span><span class="cov8" title="1">{
+                root = new(node)
+                r.trees[method] = root
+        }</span>
+
+        <span class="cov8" title="1">root.addRoute(path, handle)</span>
+}
+
+// HandlerFunc is an adapter which allows the usage of an http.HandlerFunc as a
+// request handle.
+func (r *Router) HandlerFunc(method, path string, handler http.HandlerFunc) <span class="cov8" title="1">{
+        r.Handler(method, path, handler)
+}</span>
+
+// ServeFiles serves files from the given file system root.
+// The path must end with "/*filepath", files are then served from the local
+// path /defined/root/dir/*filepath.
+// For example if root is "/etc" and *filepath is "passwd", the local file
+// "/etc/passwd" would be served.
+// Internally a http.FileServer is used, therefore http.NotFound is used instead
+// of the Router's NotFound handler.
+// To use the operating system's file system implementation,
+// use http.Dir:
+//     router.ServeFiles("/src/*filepath", http.Dir("/var/www"))
+func (r *Router) ServeFiles(path string, root http.FileSystem) <span class="cov8" title="1">{
+        if len(path) &lt; 10 || path[len(path)-10:] != "/*filepath" </span><span class="cov8" title="1">{
+                panic("path must end with /*filepath in path '" + path + "'")</span>
+        }
+
+        <span class="cov8" title="1">fileServer := http.FileServer(root)
+
+        r.GET(path, func(w http.ResponseWriter, req *http.Request, ps Params) </span><span class="cov8" title="1">{
+                req.URL.Path = ps.ByName("filepath")
+                fileServer.ServeHTTP(w, req)
+        }</span>)
+}
+
+func (r *Router) recv(w http.ResponseWriter, req *http.Request) <span class="cov8" title="1">{
+        if rcv := recover(); rcv != nil </span><span class="cov8" title="1">{
+                r.PanicHandler(w, req, rcv)
+        }</span>
+}
+
+// Lookup allows the manual lookup of a method + path combo.
+// This is e.g. useful to build a framework around this router.
+// If the path was found, it returns the handle function and the path parameter
+// values. Otherwise the third return value indicates whether a redirection to
+// the same path with an extra / without the trailing slash should be performed.
+func (r *Router) Lookup(method, path string) (Handle, Params, bool) <span class="cov8" title="1">{
+        if root := r.trees[method]; root != nil </span><span class="cov8" title="1">{
+                return root.getValue(path)
+        }</span>
+        <span class="cov8" title="1">return nil, nil, false</span>
+}
+
+func (r *Router) allowed(path, reqMethod string) (allow string) <span class="cov8" title="1">{
+        if path == "*" </span><span class="cov8" title="1">{ // server-wide
+                for method := range r.trees </span><span class="cov8" title="1">{
+                        if method == "OPTIONS" </span><span class="cov8" title="1">{
+                                continue</span>
+                        }
+
+                        // add request method to list of allowed methods
+                        <span class="cov8" title="1">if len(allow) == 0 </span><span class="cov8" title="1">{
+                                allow = method
+                        }</span> else<span class="cov8" title="1"> {
+                                allow += ", " + method
+                        }</span>
+                }
+        } else<span class="cov8" title="1"> { // specific path
+                for method := range r.trees </span><span class="cov8" title="1">{
+                        // Skip the requested method - we already tried this one
+                        if method == reqMethod || method == "OPTIONS" </span><span class="cov8" title="1">{
+                                continue</span>
+                        }
+
+                        <span class="cov8" title="1">handle, _, _ := r.trees[method].getValue(path)
+                        if handle != nil </span><span class="cov8" title="1">{
+                                // add request method to list of allowed methods
+                                if len(allow) == 0 </span><span class="cov8" title="1">{
+                                        allow = method
+                                }</span> else<span class="cov8" title="1"> {
+                                        allow += ", " + method
+                                }</span>
+                        }
+                }
+        }
+        <span class="cov8" title="1">if len(allow) &gt; 0 </span><span class="cov8" title="1">{
+                allow += ", OPTIONS"
+        }</span>
+        <span class="cov8" title="1">return</span>
+}
+
+// ServeHTTP makes the router implement the http.Handler interface.
+func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) <span class="cov8" title="1">{
+        if r.PanicHandler != nil </span><span class="cov8" title="1">{
+                defer r.recv(w, req)
+        }</span>
+
+        <span class="cov8" title="1">path := req.URL.Path
+
+        if root := r.trees[req.Method]; root != nil </span><span class="cov8" title="1">{
+                if handle, ps, tsr := root.getValue(path); handle != nil </span><span class="cov8" title="1">{
+                        handle(w, req, ps)
+                        return
+                }</span> else<span class="cov8" title="1"> if req.Method != "CONNECT" &amp;&amp; path != "/" </span><span class="cov8" title="1">{
+                        code := 301 // Permanent redirect, request with GET method
+                        if req.Method != "GET" </span><span class="cov8" title="1">{
+                                // Temporary redirect, request with same method
+                                // As of Go 1.3, Go does not support status code 308.
+                                code = 307
+                        }</span>
+
+                        <span class="cov8" title="1">if tsr &amp;&amp; r.RedirectTrailingSlash </span><span class="cov8" title="1">{
+                                if len(path) &gt; 1 &amp;&amp; path[len(path)-1] == '/' </span><span class="cov8" title="1">{
+                                        req.URL.Path = path[:len(path)-1]
+                                }</span> else<span class="cov8" title="1"> {
+                                        req.URL.Path = path + "/"
+                                }</span>
+                                <span class="cov8" title="1">http.Redirect(w, req, req.URL.String(), code)
+                                return</span>
+                        }
+
+                        // Try to fix the request path
+                        <span class="cov8" title="1">if r.RedirectFixedPath </span><span class="cov8" title="1">{
+                                fixedPath, found := root.findCaseInsensitivePath(
+                                        CleanPath(path),
+                                        r.RedirectTrailingSlash,
+                                )
+                                if found </span><span class="cov8" title="1">{
+                                        req.URL.Path = string(fixedPath)
+                                        http.Redirect(w, req, req.URL.String(), code)
+                                        return
+                                }</span>
+                        }
+                }
+        }
+
+        <span class="cov8" title="1">if req.Method == "OPTIONS" &amp;&amp; r.HandleOPTIONS </span><span class="cov8" title="1">{
+                // Handle OPTIONS requests
+                if allow := r.allowed(path, req.Method); len(allow) &gt; 0 </span><span class="cov8" title="1">{
+                        w.Header().Set("Allow", allow)
+                        return
+                }</span>
+        } else<span class="cov8" title="1"> {
+                // Handle 405
+                if r.HandleMethodNotAllowed </span><span class="cov8" title="1">{
+                        if allow := r.allowed(path, req.Method); len(allow) &gt; 0 </span><span class="cov8" title="1">{
+                                w.Header().Set("Allow", allow)
+                                if r.MethodNotAllowed != nil </span><span class="cov8" title="1">{
+                                        r.MethodNotAllowed.ServeHTTP(w, req)
+                                }</span> else<span class="cov8" title="1"> {
+                                        http.Error(w,
+                                                http.StatusText(http.StatusMethodNotAllowed),
+                                                http.StatusMethodNotAllowed,
+                                        )
+                                }</span>
+                                <span class="cov8" title="1">return</span>
+                        }
+                }
+        }
+
+        // Handle 404
+        <span class="cov8" title="1">if r.NotFound != nil </span><span class="cov8" title="1">{
+                r.NotFound.ServeHTTP(w, req)
+        }</span> else<span class="cov8" title="1"> {
+                http.NotFound(w, req)
+        }</span>
+}
+</pre>
+		
+		<pre class="file" id="file10" style="display: none">// Copyright 2013 Julien Schmidt. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be found
+// in the LICENSE file.
+
+package httprouter
+
+import (
+        "strings"
+        "unicode"
+        "unicode/utf8"
+)
+
+func min(a, b int) int <span class="cov8" title="1">{
+        if a &lt;= b </span><span class="cov8" title="1">{
+                return a
+        }</span>
+        <span class="cov8" title="1">return b</span>
+}
+
+func countParams(path string) uint8 <span class="cov8" title="1">{
+        var n uint
+        for i := 0; i &lt; len(path); i++ </span><span class="cov8" title="1">{
+                if path[i] != ':' &amp;&amp; path[i] != '*' </span><span class="cov8" title="1">{
+                        continue</span>
+                }
+                <span class="cov8" title="1">n++</span>
+        }
+        <span class="cov8" title="1">if n &gt;= 255 </span><span class="cov8" title="1">{
+                return 255
+        }</span>
+        <span class="cov8" title="1">return uint8(n)</span>
+}
+
+type nodeType uint8
+
+const (
+        static nodeType = iota // default
+        root
+        param
+        catchAll
+)
+
+type node struct {
+        path      string
+        wildChild bool
+        nType     nodeType
+        maxParams uint8
+        indices   string
+        children  []*node
+        handle    Handle
+        priority  uint32
+}
+
+// increments priority of the given child and reorders if necessary
+func (n *node) incrementChildPrio(pos int) int <span class="cov8" title="1">{
+        n.children[pos].priority++
+        prio := n.children[pos].priority
+
+        // adjust position (move to front)
+        newPos := pos
+        for newPos &gt; 0 &amp;&amp; n.children[newPos-1].priority &lt; prio </span><span class="cov8" title="1">{
+                // swap node positions
+                n.children[newPos-1], n.children[newPos] = n.children[newPos], n.children[newPos-1]
+
+                newPos--
+        }</span>
+
+        // build new index char string
+        <span class="cov8" title="1">if newPos != pos </span><span class="cov8" title="1">{
+                n.indices = n.indices[:newPos] + // unchanged prefix, might be empty
+                        n.indices[pos:pos+1] + // the index char we move
+                        n.indices[newPos:pos] + n.indices[pos+1:] // rest without char at 'pos'
+        }</span>
+
+        <span class="cov8" title="1">return newPos</span>
+}
+
+// addRoute adds a node with the given handle to the path.
+// Not concurrency-safe!
+func (n *node) addRoute(path string, handle Handle) <span class="cov8" title="1">{
+        fullPath := path
+        n.priority++
+        numParams := countParams(path)
+
+        // non-empty tree
+        if len(n.path) &gt; 0 || len(n.children) &gt; 0 </span><span class="cov8" title="1">{
+        walk:
+                for </span><span class="cov8" title="1">{
+                        // Update maxParams of the current node
+                        if numParams &gt; n.maxParams </span><span class="cov8" title="1">{
+                                n.maxParams = numParams
+                        }</span>
+
+                        // Find the longest common prefix.
+                        // This also implies that the common prefix contains no ':' or '*'
+                        // since the existing key can't contain those chars.
+                        <span class="cov8" title="1">i := 0
+                        max := min(len(path), len(n.path))
+                        for i &lt; max &amp;&amp; path[i] == n.path[i] </span><span class="cov8" title="1">{
+                                i++
+                        }</span>
+
+                        // Split edge
+                        <span class="cov8" title="1">if i &lt; len(n.path) </span><span class="cov8" title="1">{
+                                child := node{
+                                        path:      n.path[i:],
+                                        wildChild: n.wildChild,
+                                        nType:     static,
+                                        indices:   n.indices,
+                                        children:  n.children,
+                                        handle:    n.handle,
+                                        priority:  n.priority - 1,
+                                }
+
+                                // Update maxParams (max of all children)
+                                for i := range child.children </span><span class="cov8" title="1">{
+                                        if child.children[i].maxParams &gt; child.maxParams </span><span class="cov8" title="1">{
+                                                child.maxParams = child.children[i].maxParams
+                                        }</span>
+                                }
+
+                                <span class="cov8" title="1">n.children = []*node{&amp;child}
+                                // []byte for proper unicode char conversion, see #65
+                                n.indices = string([]byte{n.path[i]})
+                                n.path = path[:i]
+                                n.handle = nil
+                                n.wildChild = false</span>
+                        }
+
+                        // Make new node a child of this node
+                        <span class="cov8" title="1">if i &lt; len(path) </span><span class="cov8" title="1">{
+                                path = path[i:]
+
+                                if n.wildChild </span><span class="cov8" title="1">{
+                                        n = n.children[0]
+                                        n.priority++
+
+                                        // Update maxParams of the child node
+                                        if numParams &gt; n.maxParams </span><span class="cov8" title="1">{
+                                                n.maxParams = numParams
+                                        }</span>
+                                        <span class="cov8" title="1">numParams--
+
+                                        // Check if the wildcard matches
+                                        if len(path) &gt;= len(n.path) &amp;&amp; n.path == path[:len(n.path)] &amp;&amp;
+                                                // Check for longer wildcard, e.g. :name and :names
+                                                (len(n.path) &gt;= len(path) || path[len(n.path)] == '/') </span><span class="cov8" title="1">{
+                                                continue walk</span>
+                                        } else<span class="cov8" title="1"> {
+                                                // Wildcard conflict
+                                                var pathSeg string
+                                                if n.nType == catchAll </span><span class="cov8" title="1">{
+                                                        pathSeg = path
+                                                }</span> else<span class="cov8" title="1"> {
+                                                        pathSeg = strings.SplitN(path, "/", 2)[0]
+                                                }</span>
+                                                <span class="cov8" title="1">prefix := fullPath[:strings.Index(fullPath, pathSeg)] + n.path
+                                                panic("'" + pathSeg +
+                                                        "' in new path '" + fullPath +
+                                                        "' conflicts with existing wildcard '" + n.path +
+                                                        "' in existing prefix '" + prefix +
+                                                        "'")</span>
+                                        }
+                                }
+
+                                <span class="cov8" title="1">c := path[0]
+
+                                // slash after param
+                                if n.nType == param &amp;&amp; c == '/' &amp;&amp; len(n.children) == 1 </span><span class="cov8" title="1">{
+                                        n = n.children[0]
+                                        n.priority++
+                                        continue walk</span>
+                                }
+
+                                // Check if a child with the next path byte exists
+                                <span class="cov8" title="1">for i := 0; i &lt; len(n.indices); i++ </span><span class="cov8" title="1">{
+                                        if c == n.indices[i] </span><span class="cov8" title="1">{
+                                                i = n.incrementChildPrio(i)
+                                                n = n.children[i]
+                                                continue walk</span>
+                                        }
+                                }
+
+                                // Otherwise insert it
+                                <span class="cov8" title="1">if c != ':' &amp;&amp; c != '*' </span><span class="cov8" title="1">{
+                                        // []byte for proper unicode char conversion, see #65
+                                        n.indices += string([]byte{c})
+                                        child := &amp;node{
+                                                maxParams: numParams,
+                                        }
+                                        n.children = append(n.children, child)
+                                        n.incrementChildPrio(len(n.indices) - 1)
+                                        n = child
+                                }</span>
+                                <span class="cov8" title="1">n.insertChild(numParams, path, fullPath, handle)
+                                return</span>
+
+                        } else<span class="cov8" title="1"> if i == len(path) </span><span class="cov8" title="1">{ // Make node a (in-path) leaf
+                                if n.handle != nil </span><span class="cov8" title="1">{
+                                        panic("a handle is already registered for path '" + fullPath + "'")</span>
+                                }
+                                <span class="cov8" title="1">n.handle = handle</span>
+                        }
+                        <span class="cov8" title="1">return</span>
+                }
+        } else<span class="cov8" title="1"> { // Empty tree
+                n.insertChild(numParams, path, fullPath, handle)
+                n.nType = root
+        }</span>
+}
+
+func (n *node) insertChild(numParams uint8, path, fullPath string, handle Handle) <span class="cov8" title="1">{
+        var offset int // already handled bytes of the path
+
+        // find prefix until first wildcard (beginning with ':'' or '*'')
+        for i, max := 0, len(path); numParams &gt; 0; i++ </span><span class="cov8" title="1">{
+                c := path[i]
+                if c != ':' &amp;&amp; c != '*' </span><span class="cov8" title="1">{
+                        continue</span>
+                }
+
+                // find wildcard end (either '/' or path end)
+                <span class="cov8" title="1">end := i + 1
+                for end &lt; max &amp;&amp; path[end] != '/' </span><span class="cov8" title="1">{
+                        switch path[end] </span>{
+                        // the wildcard name must not contain ':' and '*'
+                        case ':', '*':<span class="cov8" title="1">
+                                panic("only one wildcard per path segment is allowed, has: '" +
+                                        path[i:] + "' in path '" + fullPath + "'")</span>
+                        default:<span class="cov8" title="1">
+                                end++</span>
+                        }
+                }
+
+                // check if this Node existing children which would be
+                // unreachable if we insert the wildcard here
+                <span class="cov8" title="1">if len(n.children) &gt; 0 </span><span class="cov8" title="1">{
+                        panic("wildcard route '" + path[i:end] +
+                                "' conflicts with existing children in path '" + fullPath + "'")</span>
+                }
+
+                // check if the wildcard has a name
+                <span class="cov8" title="1">if end-i &lt; 2 </span><span class="cov8" title="1">{
+                        panic("wildcards must be named with a non-empty name in path '" + fullPath + "'")</span>
+                }
+
+                <span class="cov8" title="1">if c == ':' </span><span class="cov8" title="1">{ // param
+                        // split path at the beginning of the wildcard
+                        if i &gt; 0 </span><span class="cov8" title="1">{
+                                n.path = path[offset:i]
+                                offset = i
+                        }</span>
+
+                        <span class="cov8" title="1">child := &amp;node{
+                                nType:     param,
+                                maxParams: numParams,
+                        }
+                        n.children = []*node{child}
+                        n.wildChild = true
+                        n = child
+                        n.priority++
+                        numParams--
+
+                        // if the path doesn't end with the wildcard, then there
+                        // will be another non-wildcard subpath starting with '/'
+                        if end &lt; max </span><span class="cov8" title="1">{
+                                n.path = path[offset:end]
+                                offset = end
+
+                                child := &amp;node{
+                                        maxParams: numParams,
+                                        priority:  1,
+                                }
+                                n.children = []*node{child}
+                                n = child
+                        }</span>
+
+                } else<span class="cov8" title="1"> { // catchAll
+                        if end != max || numParams &gt; 1 </span><span class="cov8" title="1">{
+                                panic("catch-all routes are only allowed at the end of the path in path '" + fullPath + "'")</span>
+                        }
+
+                        <span class="cov8" title="1">if len(n.path) &gt; 0 &amp;&amp; n.path[len(n.path)-1] == '/' </span><span class="cov8" title="1">{
+                                panic("catch-all conflicts with existing handle for the path segment root in path '" + fullPath + "'")</span>
+                        }
+
+                        // currently fixed width 1 for '/'
+                        <span class="cov8" title="1">i--
+                        if path[i] != '/' </span><span class="cov8" title="1">{
+                                panic("no / before catch-all in path '" + fullPath + "'")</span>
+                        }
+
+                        <span class="cov8" title="1">n.path = path[offset:i]
+
+                        // first node: catchAll node with empty path
+                        child := &amp;node{
+                                wildChild: true,
+                                nType:     catchAll,
+                                maxParams: 1,
+                        }
+                        n.children = []*node{child}
+                        n.indices = string(path[i])
+                        n = child
+                        n.priority++
+
+                        // second node: node holding the variable
+                        child = &amp;node{
+                                path:      path[i:],
+                                nType:     catchAll,
+                                maxParams: 1,
+                                handle:    handle,
+                                priority:  1,
+                        }
+                        n.children = []*node{child}
+
+                        return</span>
+                }
+        }
+
+        // insert remaining path part and handle to the leaf
+        <span class="cov8" title="1">n.path = path[offset:]
+        n.handle = handle</span>
+}
+
+// Returns the handle registered with the given path (key). The values of
+// wildcards are saved to a map.
+// If no handle can be found, a TSR (trailing slash redirect) recommendation is
+// made if a handle exists with an extra (without the) trailing slash for the
+// given path.
+func (n *node) getValue(path string) (handle Handle, p Params, tsr bool) <span class="cov8" title="1">{
+walk: // outer loop for walking the tree
+        for </span><span class="cov8" title="1">{
+                if len(path) &gt; len(n.path) </span><span class="cov8" title="1">{
+                        if path[:len(n.path)] == n.path </span><span class="cov8" title="1">{
+                                path = path[len(n.path):]
+                                // If this node does not have a wildcard (param or catchAll)
+                                // child,  we can just look up the next child node and continue
+                                // to walk down the tree
+                                if !n.wildChild </span><span class="cov8" title="1">{
+                                        c := path[0]
+                                        for i := 0; i &lt; len(n.indices); i++ </span><span class="cov8" title="1">{
+                                                if c == n.indices[i] </span><span class="cov8" title="1">{
+                                                        n = n.children[i]
+                                                        continue walk</span>
+                                                }
+                                        }
+
+                                        // Nothing found.
+                                        // We can recommend to redirect to the same URL without a
+                                        // trailing slash if a leaf exists for that path.
+                                        <span class="cov8" title="1">tsr = (path == "/" &amp;&amp; n.handle != nil)
+                                        return</span>
+
+                                }
+
+                                // handle wildcard child
+                                <span class="cov8" title="1">n = n.children[0]
+                                switch n.nType </span>{
+                                case param:<span class="cov8" title="1">
+                                        // find param end (either '/' or path end)
+                                        end := 0
+                                        for end &lt; len(path) &amp;&amp; path[end] != '/' </span><span class="cov8" title="1">{
+                                                end++
+                                        }</span>
+
+                                        // save param value
+                                        <span class="cov8" title="1">if p == nil </span><span class="cov8" title="1">{
+                                                // lazy allocation
+                                                p = make(Params, 0, n.maxParams)
+                                        }</span>
+                                        <span class="cov8" title="1">i := len(p)
+                                        p = p[:i+1] // expand slice within preallocated capacity
+                                        p[i].Key = n.path[1:]
+                                        p[i].Value = path[:end]
+
+                                        // we need to go deeper!
+                                        if end &lt; len(path) </span><span class="cov8" title="1">{
+                                                if len(n.children) &gt; 0 </span><span class="cov8" title="1">{
+                                                        path = path[end:]
+                                                        n = n.children[0]
+                                                        continue walk</span>
+                                                }
+
+                                                // ... but we can't
+                                                <span class="cov8" title="1">tsr = (len(path) == end+1)
+                                                return</span>
+                                        }
+
+                                        <span class="cov8" title="1">if handle = n.handle; handle != nil </span><span class="cov8" title="1">{
+                                                return
+                                        }</span> else<span class="cov8" title="1"> if len(n.children) == 1 </span><span class="cov8" title="1">{
+                                                // No handle found. Check if a handle for this path + a
+                                                // trailing slash exists for TSR recommendation
+                                                n = n.children[0]
+                                                tsr = (n.path == "/" &amp;&amp; n.handle != nil)
+                                        }</span>
+
+                                        <span class="cov8" title="1">return</span>
+
+                                case catchAll:<span class="cov8" title="1">
+                                        // save param value
+                                        if p == nil </span><span class="cov8" title="1">{
+                                                // lazy allocation
+                                                p = make(Params, 0, n.maxParams)
+                                        }</span>
+                                        <span class="cov8" title="1">i := len(p)
+                                        p = p[:i+1] // expand slice within preallocated capacity
+                                        p[i].Key = n.path[2:]
+                                        p[i].Value = path
+
+                                        handle = n.handle
+                                        return</span>
+
+                                default:<span class="cov8" title="1">
+                                        panic("invalid node type")</span>
+                                }
+                        }
+                } else<span class="cov8" title="1"> if path == n.path </span><span class="cov8" title="1">{
+                        // We should have reached the node containing the handle.
+                        // Check if this node has a handle registered.
+                        if handle = n.handle; handle != nil </span><span class="cov8" title="1">{
+                                return
+                        }</span>
+
+                        <span class="cov8" title="1">if path == "/" &amp;&amp; n.wildChild &amp;&amp; n.nType != root </span><span class="cov8" title="1">{
+                                tsr = true
+                                return
+                        }</span>
+
+                        // No handle found. Check if a handle for this path + a
+                        // trailing slash exists for trailing slash recommendation
+                        <span class="cov8" title="1">for i := 0; i &lt; len(n.indices); i++ </span><span class="cov8" title="1">{
+                                if n.indices[i] == '/' </span><span class="cov8" title="1">{
+                                        n = n.children[i]
+                                        tsr = (len(n.path) == 1 &amp;&amp; n.handle != nil) ||
+                                                (n.nType == catchAll &amp;&amp; n.children[0].handle != nil)
+                                        return
+                                }</span>
+                        }
+
+                        <span class="cov8" title="1">return</span>
+                }
+
+                // Nothing found. We can recommend to redirect to the same URL with an
+                // extra trailing slash if a leaf exists for that path
+                <span class="cov8" title="1">tsr = (path == "/") ||
+                        (len(n.path) == len(path)+1 &amp;&amp; n.path[len(path)] == '/' &amp;&amp;
+                                path == n.path[:len(n.path)-1] &amp;&amp; n.handle != nil)
+                return</span>
+        }
+}
+
+// Makes a case-insensitive lookup of the given path and tries to find a handler.
+// It can optionally also fix trailing slashes.
+// It returns the case-corrected path and a bool indicating whether the lookup
+// was successful.
+func (n *node) findCaseInsensitivePath(path string, fixTrailingSlash bool) (ciPath []byte, found bool) <span class="cov8" title="1">{
+        return n.findCaseInsensitivePathRec(
+                path,
+                strings.ToLower(path),
+                make([]byte, 0, len(path)+1), // preallocate enough memory for new path
+                [4]byte{},                    // empty rune buffer
+                fixTrailingSlash,
+        )
+}</span>
+
+// shift bytes in array by n bytes left
+func shiftNRuneBytes(rb [4]byte, n int) [4]byte <span class="cov8" title="1">{
+        switch n </span>{
+        case 0:<span class="cov8" title="1">
+                return rb</span>
+        case 1:<span class="cov8" title="1">
+                return [4]byte{rb[1], rb[2], rb[3], 0}</span>
+        case 2:<span class="cov8" title="1">
+                return [4]byte{rb[2], rb[3]}</span>
+        case 3:<span class="cov8" title="1">
+                return [4]byte{rb[3]}</span>
+        default:<span class="cov8" title="1">
+                return [4]byte{}</span>
+        }
+}
+
+// recursive case-insensitive lookup function used by n.findCaseInsensitivePath
+func (n *node) findCaseInsensitivePathRec(path, loPath string, ciPath []byte, rb [4]byte, fixTrailingSlash bool) ([]byte, bool) <span class="cov8" title="1">{
+        loNPath := strings.ToLower(n.path)
+
+walk: // outer loop for walking the tree
+        for len(loPath) &gt;= len(loNPath) &amp;&amp; (len(loNPath) == 0 || loPath[1:len(loNPath)] == loNPath[1:]) </span><span class="cov8" title="1">{
+                // add common path to result
+                ciPath = append(ciPath, n.path...)
+
+                if path = path[len(n.path):]; len(path) &gt; 0 </span><span class="cov8" title="1">{
+                        loOld := loPath
+                        loPath = loPath[len(loNPath):]
+
+                        // If this node does not have a wildcard (param or catchAll) child,
+                        // we can just look up the next child node and continue to walk down
+                        // the tree
+                        if !n.wildChild </span><span class="cov8" title="1">{
+                                // skip rune bytes already processed
+                                rb = shiftNRuneBytes(rb, len(loNPath))
+
+                                if rb[0] != 0 </span><span class="cov8" title="1">{
+                                        // old rune not finished
+                                        for i := 0; i &lt; len(n.indices); i++ </span><span class="cov8" title="1">{
+                                                if n.indices[i] == rb[0] </span><span class="cov8" title="1">{
+                                                        // continue with child node
+                                                        n = n.children[i]
+                                                        loNPath = strings.ToLower(n.path)
+                                                        continue walk</span>
+                                                }
+                                        }
+                                } else<span class="cov8" title="1"> {
+                                        // process a new rune
+                                        var rv rune
+
+                                        // find rune start
+                                        // runes are up to 4 byte long,
+                                        // -4 would definitely be another rune
+                                        var off int
+                                        for max := min(len(loNPath), 3); off &lt; max; off++ </span><span class="cov8" title="1">{
+                                                if i := len(loNPath) - off; utf8.RuneStart(loOld[i]) </span><span class="cov8" title="1">{
+                                                        // read rune from cached lowercase path
+                                                        rv, _ = utf8.DecodeRuneInString(loOld[i:])
+                                                        break</span>
+                                                }
+                                        }
+
+                                        // calculate lowercase bytes of current rune
+                                        <span class="cov8" title="1">utf8.EncodeRune(rb[:], rv)
+                                        // skipp already processed bytes
+                                        rb = shiftNRuneBytes(rb, off)
+
+                                        for i := 0; i &lt; len(n.indices); i++ </span><span class="cov8" title="1">{
+                                                // lowercase matches
+                                                if n.indices[i] == rb[0] </span><span class="cov8" title="1">{
+                                                        // must use a recursive approach since both the
+                                                        // uppercase byte and the lowercase byte might exist
+                                                        // as an index
+                                                        if out, found := n.children[i].findCaseInsensitivePathRec(
+                                                                path, loPath, ciPath, rb, fixTrailingSlash,
+                                                        ); found </span><span class="cov8" title="1">{
+                                                                return out, true
+                                                        }</span>
+                                                        <span class="cov8" title="1">break</span>
+                                                }
+                                        }
+
+                                        // same for uppercase rune, if it differs
+                                        <span class="cov8" title="1">if up := unicode.ToUpper(rv); up != rv </span><span class="cov8" title="1">{
+                                                utf8.EncodeRune(rb[:], up)
+                                                rb = shiftNRuneBytes(rb, off)
+
+                                                for i := 0; i &lt; len(n.indices); i++ </span><span class="cov8" title="1">{
+                                                        // uppercase matches
+                                                        if n.indices[i] == rb[0] </span><span class="cov8" title="1">{
+                                                                // continue with child node
+                                                                n = n.children[i]
+                                                                loNPath = strings.ToLower(n.path)
+                                                                continue walk</span>
+                                                        }
+                                                }
+                                        }
+                                }
+
+                                // Nothing found. We can recommend to redirect to the same URL
+                                // without a trailing slash if a leaf exists for that path
+                                <span class="cov8" title="1">return ciPath, (fixTrailingSlash &amp;&amp; path == "/" &amp;&amp; n.handle != nil)</span>
+                        }
+
+                        <span class="cov8" title="1">n = n.children[0]
+                        switch n.nType </span>{
+                        case param:<span class="cov8" title="1">
+                                // find param end (either '/' or path end)
+                                k := 0
+                                for k &lt; len(path) &amp;&amp; path[k] != '/' </span><span class="cov8" title="1">{
+                                        k++
+                                }</span>
+
+                                // add param value to case insensitive path
+                                <span class="cov8" title="1">ciPath = append(ciPath, path[:k]...)
+
+                                // we need to go deeper!
+                                if k &lt; len(path) </span><span class="cov8" title="1">{
+                                        if len(n.children) &gt; 0 </span><span class="cov8" title="1">{
+                                                // continue with child node
+                                                n = n.children[0]
+                                                loNPath = strings.ToLower(n.path)
+                                                loPath = loPath[k:]
+                                                path = path[k:]
+                                                continue</span>
+                                        }
+
+                                        // ... but we can't
+                                        <span class="cov8" title="1">if fixTrailingSlash &amp;&amp; len(path) == k+1 </span><span class="cov8" title="1">{
+                                                return ciPath, true
+                                        }</span>
+                                        <span class="cov8" title="1">return ciPath, false</span>
+                                }
+
+                                <span class="cov8" title="1">if n.handle != nil </span><span class="cov8" title="1">{
+                                        return ciPath, true
+                                }</span> else<span class="cov8" title="1"> if fixTrailingSlash &amp;&amp; len(n.children) == 1 </span><span class="cov8" title="1">{
+                                        // No handle found. Check if a handle for this path + a
+                                        // trailing slash exists
+                                        n = n.children[0]
+                                        if n.path == "/" &amp;&amp; n.handle != nil </span><span class="cov8" title="1">{
+                                                return append(ciPath, '/'), true
+                                        }</span>
+                                }
+                                <span class="cov8" title="1">return ciPath, false</span>
+
+                        case catchAll:<span class="cov8" title="1">
+                                return append(ciPath, path...), true</span>
+
+                        default:<span class="cov8" title="1">
+                                panic("invalid node type")</span>
+                        }
+                } else<span class="cov8" title="1"> {
+                        // We should have reached the node containing the handle.
+                        // Check if this node has a handle registered.
+                        if n.handle != nil </span><span class="cov8" title="1">{
+                                return ciPath, true
+                        }</span>
+
+                        // No handle found.
+                        // Try to fix the path by adding a trailing slash
+                        <span class="cov8" title="1">if fixTrailingSlash </span><span class="cov8" title="1">{
+                                for i := 0; i &lt; len(n.indices); i++ </span><span class="cov8" title="1">{
+                                        if n.indices[i] == '/' </span><span class="cov8" title="1">{
+                                                n = n.children[i]
+                                                if (len(n.path) == 1 &amp;&amp; n.handle != nil) ||
+                                                        (n.nType == catchAll &amp;&amp; n.children[0].handle != nil) </span><span class="cov8" title="1">{
+                                                        return append(ciPath, '/'), true
+                                                }</span>
+                                                <span class="cov8" title="1">return ciPath, false</span>
+                                        }
+                                }
+                        }
+                        <span class="cov8" title="1">return ciPath, false</span>
+                }
+        }
+
+        // Nothing found.
+        // Try to fix the path by adding / removing a trailing slash
+        <span class="cov8" title="1">if fixTrailingSlash </span><span class="cov8" title="1">{
+                if path == "/" </span><span class="cov8" title="1">{
+                        return ciPath, true
+                }</span>
+                <span class="cov8" title="1">if len(loPath)+1 == len(loNPath) &amp;&amp; loNPath[len(loPath)] == '/' &amp;&amp;
+                        loPath[1:] == loNPath[1:len(loPath)] &amp;&amp; n.handle != nil </span><span class="cov8" title="1">{
+                        return append(ciPath, n.path...), true
+                }</span>
+        }
+        <span class="cov8" title="1">return ciPath, false</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>

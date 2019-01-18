@@ -17,7 +17,6 @@ RUN echo '        <server ip="ec2-54-255-240-156.ap-southeast-1.compute.amazonaw
 RUN echo '    </servers>' >> /data/appdatas/cat/client.xml 
 RUN echo '</config>' >> /data/appdatas/cat/client.xml
 
-
 # Basic setup
 WORKDIR /var/src/gateway
 EXPOSE 80 443

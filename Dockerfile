@@ -13,7 +13,7 @@ RUN mkdir -p /data/applogs/cat
 RUN echo '<?xml version="1.0" encoding="utf-8"?>' >> /data/appdatas/cat/client.xml 
 RUN echo '<config xmlns:xsi="http://www.w3.org/2001/XMLSchema" xsi:noNamespaceSchemaLocation="config.xsd">' >> /data/appdatas/cat/client.xml 
 RUN echo '    <servers>' >> /data/appdatas/cat/client.xml 
-RUN echo '        <server ip="54.255.240.156" port="2280" http-port="8080" />' >> /data/appdatas/cat/client.xml 
+RUN echo '        <server ip="10.1.0.172" port="2280" http-port="8080" />' >> /data/appdatas/cat/client.xml 
 RUN echo '    </servers>' >> /data/appdatas/cat/client.xml 
 RUN echo '</config>' >> /data/appdatas/cat/client.xml
 
@@ -21,4 +21,4 @@ RUN echo '</config>' >> /data/appdatas/cat/client.xml
 WORKDIR /var/src/gateway
 EXPOSE 80 443
 
-CMD ["go", "run", "main.go"]
+CMD ["bash"]

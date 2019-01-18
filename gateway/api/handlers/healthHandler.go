@@ -10,7 +10,7 @@ import (
 
 func init() {
 	cat.DebugOn()
-	cat.Init("aiapigateway_ldev")
+	cat.Init("aiapigateway")
 }
 
 func reportCase() {

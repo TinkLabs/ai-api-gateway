@@ -14,13 +14,13 @@ func init() {
 }
 
 func reportCase() {
-	t := cat.NewTransaction("case_in_health_check", "trans_1")
+	t := cat.NewTransaction("case_in_health_check_by_domain", "trans_1")
 	defer t.Complete()
 
-	e:= cat.NewEvent("case_in_health_check", "event_1")
+	e:= cat.NewEvent("case_in_health_check_by_domain", "event_1")
 	defer e.Complete()
 
-	cat.NewMetricHelper("magric_1").Count(int(rand.Int31n(100)))
+	cat.NewMetricHelper("magric_1_by_domain").Count(int(rand.Int31n(100)))
 }
 
 func HealthCheck(w http.ResponseWriter, r *http.Request) {

@@ -5,7 +5,7 @@ ADD . /var/src
 
 # Setup project
 RUN cd /var/src/gateway \
- dep ensure 
+    dep ensure 
 
 # Init CAT env
 RUN mkdir -p /data/appdatas/cat

@@ -21,4 +21,4 @@ RUN echo '</config>' >> /data/appdatas/cat/client.xml
 WORKDIR /var/src/gateway
 EXPOSE 80 443
 
-CMD ["bash"]
+CMD ["go", "run", "main.go"]

@@ -1,6 +1,7 @@
 package valid
 
 import (
+	"bytes"
 	"crypto/hmac"
 	"crypto/sha256"
 	//"encoding/hex"
@@ -125,6 +126,8 @@ func GenSignatureForPostAndPutAndPatch(w http.ResponseWriter, r *http.Request) s
 
 	// get the value of body
 	body, _ := ioutil.ReadAll(r.Body)
+	// Restore the io.ReadCloser to its original state
+	r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
 	var params string = ""
 
 	params = fmt.Sprintf("%s", body)

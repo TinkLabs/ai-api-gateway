@@ -1,10 +1,14 @@
 package valid
 
 import (
-	"gateway/internal/public"
-	"gateway/configs"
-	"net/http"
+	//"bytes"
 	"fmt"
+	"gateway/configs"
+	"gateway/internal/public"
+	"io/ioutil"
+
+	//"io"
+	"net/http"
 )
 
 func SendRequest(w http.ResponseWriter, r *http.Request,reqUrl string)  {
@@ -20,14 +24,26 @@ func SendRequest(w http.ResponseWriter, r *http.Request,reqUrl string)  {
 	reqHeader["Authorization"] = "73bef7wr4kw84vfu8hbrudvmfudy"
 
 	// Setup Body
-	r.ParseForm()
-	body := make(public.JsonFormat)
-	for key, val := range r.Form {
-		body[key] = val[0]
-	}
+	//r.ParseForm()
+	//body := make(public.JsonFormat)
+	//for key, val := range r.Form {
+	//	body[key] = val[0]
+	//}
+	//
+	//fmt.Printf("body is %v\n",body)
+
+	//var reqParams io.Reader
+	//body, err := r.Body;
+	//if  err == nil {
+	//	reqParams = body
+	//} else {
+	//	reqParams = bytes.NewReader([]byte{})
+	//}
+
+	reqParam,_ := ioutil.ReadAll(r.Body)
 
 	// Make Request
-	response, header, err := public.NewRequest(reqUrl, r.Method, "", reqHeader, body)
+	response, header, err := public.NewRequest(reqUrl, r.Method, "", reqHeader, reqParam)
 
 	// Request Error
 	if err != nil {
@@ -49,9 +65,9 @@ func SendRequest(w http.ResponseWriter, r *http.Request,reqUrl string)  {
 	}
 
 	// For application Log
-	public.Logger(public.Message{"path": reqUrl, "body":body, "timecount": public.TimerEnd()})
+	public.Logger(public.Message{"path": reqUrl, "body":string(reqParam), "timecount": public.TimerEnd()})
 
-	fmt.Printf("\n response %s",response)
+	//fmt.Printf("\n response %s",response)
 	// Print the Result
 	fmt.Fprintf(w, "%s", response)
 	return

@@ -1,11 +1,12 @@
 package handlers
 
 import (
+    "fmt"
+    "gateway/configs"
     "gateway/internal/public"
     "gateway/internal/valid"
-    "gateway/configs"
     "net/http"
-    "fmt"
+    "net/url"
 )
 
 func Backend2(w http.ResponseWriter, r *http.Request) {
@@ -30,9 +31,11 @@ func Backend2(w http.ResponseWriter, r *http.Request) {
 
     // Setup Body
     r.ParseForm()
+
+
     body := make(public.JsonFormat)
     for key, val := range r.Form {
-        body[key] = val[0]
+       body[key] = val[0]
     }
 
     // Valid Request
@@ -49,8 +52,15 @@ func Backend2(w http.ResponseWriter, r *http.Request) {
         }
     }
 
+    data := url.Values{}
+    if body != nil {
+        for key, val := range body {
+            data.Add(key, val.(string))
+        }
+    }
+
     // Make Request
-    response, header, err := public.NewRequest(reqUrl, r.Method, reqHost, reqHeader, body)
+    response, header, err := public.NewRequest(reqUrl, r.Method, reqHost, reqHeader, []byte(data.Encode()))
 
     // Request Error 
     if err != nil {

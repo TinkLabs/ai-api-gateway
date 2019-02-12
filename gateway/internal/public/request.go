@@ -1,16 +1,16 @@
 package public
 
 import (
-	"net/http"
-	"net/url"
-	"io/ioutil"
-	"strings"
+	"bytes"
 	"errors"
+	"io/ioutil"
+	"net/http"
+	"strings"
 )
 
 type JsonFormat map[string]interface{}
 
-func NewRequest(path string, method string, host string, header JsonFormat, param JsonFormat) ([]byte, JsonFormat, error) {
+func NewRequest(path string, method string, host string, header JsonFormat, param []byte) ([]byte, JsonFormat, error) {
 
 	err := errors.New("Incorrect request")
 	respHeader := make(JsonFormat)
@@ -18,19 +18,11 @@ func NewRequest(path string, method string, host string, header JsonFormat, para
 		return nil, respHeader, err
 	}
 
-	// Request Body
-	data := url.Values{}
-	if param != nil {
-		for key, val := range param {
-			data.Add(key, val.(string))
-		}
-	}
-
 	// Request Path
-	req, err := http.NewRequest(method, path, strings.NewReader(data.Encode()))
+	req, err := http.NewRequest(method, path, bytes.NewReader(param))
 	if err != nil {
-        return nil, respHeader, err
-    }
+		return nil, respHeader, err
+	}
 
 	// Request Host
 	if host != "" {

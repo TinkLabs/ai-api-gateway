@@ -13,12 +13,16 @@ import (
 func Api(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	path := strings.Split(ps[0].Value, "/");
+	fmt.Printf("%v\n", path)
 
-	profix := strings.Join(path[1:2], "/")
-	fmt.Printf("%v\n", path);
-	fmt.Println(profix)
+	prefixLen := 3;
+	if len(path) < 3 {
+		prefixLen = len(path)
+	}
+	prefix := strings.Join(path[1:prefixLen], "/")
+	fmt.Println(prefix)
 
-	switch  profix {
+	switch  prefix {
 	case "healthcheck":
 		handlers.HealthCheck(w, r)
 	case "ai/v1":

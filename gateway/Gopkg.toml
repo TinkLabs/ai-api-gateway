@@ -33,9 +33,3 @@ required = ["github.com/julienschmidt/httprouter", "github.com/Meituan-Dianping/
 [[constraint]]
   name = "github.com/julienschmidt/httprouter"
   version = "1.1.0"
-
-
-[[constraint]]
-  branch = "master"
-  name = "github.com/Meituan-Dianping/cat-go"
-#  version = "~2.0.0"

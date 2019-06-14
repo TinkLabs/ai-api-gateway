@@ -23,7 +23,7 @@ func Api(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	fmt.Println(prefix)
 
 	switch  prefix {
-	case "healthcheck":
+	case "healthcheck/":
 		handlers.HealthCheck(w, r)
 	case "ai/v1":
 		handlers.AiServices(w, r)
